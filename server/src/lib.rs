@@ -130,8 +130,6 @@ impl Server {
         let session_id = Uuid::new_v4().to_string();
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
-        conn.register_session(session_id.clone(), tx);
-
         let msg = Message::StartSession {
             session_id: session_id.clone(),
             rows,
@@ -141,6 +139,8 @@ impl Server {
 
         conn.send_message(msg)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to start session: {}", e)))?;
+
+        conn.register_session(session_id.clone(), tx);
 
         Ok(Session {
             session_id,
