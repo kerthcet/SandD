@@ -447,6 +447,7 @@ where
                 break ServeOutcome::Shutdown;
             }
 
+<<<<<<< Updated upstream
             // Heartbeat send failed => connection is dead. Reconnect. (The Err
             // arm — heartbeat task gone without signalling — is treated the same:
             // no live heartbeat means no live connection.)
@@ -496,6 +497,26 @@ where
             }
         }
     };
+=======
+        // Spawn task to handle message concurrently
+        let ws_tx_task = ws_tx_clone.clone();
+        let executor_task = executor.clone();
+        let session_manager_task = session_manager.clone();
+
+        tokio::spawn(async move {
+            if let Err(e) = handle_message(
+                message,
+                ws_tx_task,
+                executor_task,
+                session_manager_task,
+            )
+            .await
+            {
+                error!("Error handling message: {}", e);
+            }
+        });
+    }
+>>>>>>> Stashed changes
 
     heartbeat_handle.abort();
     info!("Disconnected from agent");

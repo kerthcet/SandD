@@ -183,12 +183,17 @@ impl Server {
         conn.send_message(msg)
             .map_err(|e| PyRuntimeError::new_err(format!("Failed to send command: {}", e)))?;
 
+<<<<<<< Updated upstream
         // Release GIL while waiting for result to allow Python thread concurrency
         // Re-acquire GIL to return result or raise timeout error
+=======
+        // Release GIL while waiting for result to allow concurrent Python threads
+>>>>>>> Stashed changes
         py.allow_threads(|| {
             self.runtime.block_on(async {
                 // Wait for result with timeout
                 match tokio::time::timeout(Duration::from_secs(timeout), rx).await {
+<<<<<<< Updated upstream
                     Ok(Ok(Message::CommandOutput {
                         stdout,
                         stderr,
@@ -205,6 +210,14 @@ impl Server {
                         Err(PyRuntimeError::new_err(format!("Command error: {}", error)))
                     }
                     Ok(Ok(_)) => Err(PyRuntimeError::new_err("Unexpected response type")),
+=======
+                    Ok(Ok(result)) => Ok(PyCommandResult {
+                        stdout: result.stdout,
+                        stderr: result.stderr,
+                        exit_code: result.exit_code,
+                        duration_ms: result.duration_ms,
+                    }),
+>>>>>>> Stashed changes
                     Ok(Err(_)) => Err(PyRuntimeError::new_err("Command channel closed")),
                     Err(_) => Err(PyTimeoutError::new_err("Command execution timed out")),
                 }
